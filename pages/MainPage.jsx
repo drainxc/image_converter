@@ -3,30 +3,30 @@ import styled from "styled-components";
 
 const MainPage = () => {
   const [settings, setSettings] = useState({
-    width: 89,
+    width: 100,
     type: "blackAndWhite",
   });
   const editorRef = useRef(null);
   const [edit, setEdit] = useState(false);
+  const [before, setBefore] = useState("");
 
   const SelectFile = (e) => {
-    console.log(settings.type);
     const files = e.target.files[0];
-    if (settings.type === "dotart") {
-      loadNewImage(URL.createObjectURL(files));
-    } else if (settings.type == "blackAndWhite") {
-      setEdit(true);
-      insertContent(files);
-    } else if (settings.type == "colorReversal") {
-      setEdit(true);
-      insertContent(files);
-    } else if (settings.type == "reversal") {
-      setEdit(true);
-      insertContent(files);
-    } else if (settings.type == "blur") {
-      setEdit(true);
-      insertContent(files);
+    editorRef.current.value = "";
+    if (editorRef.current.children[0]) {
+      editorRef.current.children[editorRef.current.children.length - 1].src =
+        "";
     }
+
+    setEdit(true);
+    if (settings.type === "dotart") {
+      setBefore(URL.createObjectURL(files));
+      loadNewImage(URL.createObjectURL(files));
+      setEdit(false);
+    } else if (settings.type == "blackAndWhite") insertContent(files);
+    else if (settings.type == "colorReversal") insertContent(files);
+    else if (settings.type == "reversal") insertContent(files);
+    else if (settings.type == "blur") insertContent(files);
   };
 
   async function loadNewImage(src) {
@@ -120,8 +120,11 @@ const MainPage = () => {
     reader.readAsDataURL(file);
   };
 
-  const typeChange = (e) => {
-    setSettings({ ...settings, type: e.target.value });
+  const typeChange = (e) => setSettings({ ...settings, type: e.target.value });
+
+  const setWidth = (e) => {
+    setSettings({ ...settings, width: e.target.value });
+    loadNewImage(before);
   };
 
   return (
@@ -141,12 +144,19 @@ const MainPage = () => {
           <option value="dotart">도트 아트</option>
           <option value="colorReversal">색상반전</option>
           <option value="reversal">반전</option>
-          <option value="clmtrackr">clmtrackr</option>
           <option value="blur">가우시안 블러</option>
-          <option value="mosaic">모자이크</option>
         </TypeSelect>
-        <SaveBtn>저장</SaveBtn>
-        <SaveBtn>삭제</SaveBtn>
+        <Btn>저장</Btn>
+        <Btn>삭제</Btn>
+        <WidthInpurt>
+          <span>Width : </span>
+          <input
+            type={"number"}
+            value={settings.width}
+            onChange={(e) => setWidth(e)}
+            step="1"
+          />
+        </WidthInpurt>
         <Original>
           <img src="" alt="" />
         </Original>
@@ -159,6 +169,7 @@ const MainPage = () => {
           colorReversal={settings.type === "colorReversal"}
           reversal={settings.type === "reversal"}
           blur={settings.type === "blur"}
+          width={settings.width}
         ></ContentEdit>
       </Content>
     </MainDiv>
@@ -171,7 +182,7 @@ const MainDiv = styled.div`
 `;
 
 const ContentEdit = styled.div`
-  width: 100%;
+  width: ${(props) => `${props.width * 15}` + "px"};
   height: 100%;
   color: white;
   img {
@@ -185,7 +196,7 @@ const ContentEdit = styled.div`
         ? "invert(1)"
         : props.blur
         ? "blur(13px)"
-        : "blur(0px)"};
+        : "none"};
     transform: ${(props) => (props.reversal ? "scale(-1,1)" : "scale(1,1)")};
   }
 `;
@@ -193,10 +204,22 @@ const ContentEdit = styled.div`
 const Content = styled.p`
   overflow: hidden;
   overflow: scroll;
-  overflow-x: hidden;
   width: 78vw;
   height: 100vh;
   padding: 30px;
+
+  &::-webkit-scrollbar {
+    background-color: var(--sub-color);
+    border-radius: 5px;
+    width: 3px;
+    height: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--main-color);
+    border-radius: 3px;
+    width: 3px;
+    height: 3px;
+  }
 `;
 
 const SideBar = styled.div`
@@ -282,7 +305,7 @@ const TypeSelect = styled.select`
   }
 `;
 
-const SaveBtn = styled.div`
+const Btn = styled.div`
   width: 150px;
   height: 65px;
   background-color: var(--box-color);
@@ -294,4 +317,20 @@ const SaveBtn = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const WidthInpurt = styled.div`
+  margin-top: 15px;
+  color: var(--sub-color);
+  font-weight: 900;
+  input {
+    width: 73px;
+    height: 40px;
+    border-radius: 4px;
+    background-color: var(--box-color);
+    color: var(--sub-color);
+    border: none;
+    outline: none;
+    padding-left: 10px;
+  }
 `;
