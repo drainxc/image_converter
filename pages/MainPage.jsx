@@ -13,12 +13,93 @@ const MainPage = () => {
     console.log(settings.type);
     const files = e.target.files[0];
     if (settings.type === "dotart") {
+      loadNewImage(URL.createObjectURL(files));
     } else if (settings.type == "blackAndWhite") {
       setEdit(true);
       insertContent(files);
     }
   };
 
+  async function loadNewImage(src) {
+    const canvas = await createImageCanvas(src);
+    const text = canvasToText(canvas);
+    editorRef.current.innerHTML = text;
+  }
+
+  const createImageCanvas = (src) => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("CANVAS");
+      const image = new Image();
+
+      image.onload = () => {
+        let width = image.width;
+        let height = image.height;
+        if (image.width != settings.width * 2) {
+          width = settings.width * 2;
+          height = (width * image.height) / image.width;
+        }
+
+        canvas.width = width - (width % 2);
+        canvas.height = height - (height % 4);
+
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas);
+      };
+
+      image.src = src;
+    });
+  };
+
+  const pixelsToCharacter = (pixels_lo_hi) => {
+    const shift_values = [0, 1, 2, 6, 3, 4, 5, 7];
+    let codepoint_offset = 0;
+    for (const i in pixels_lo_hi) {
+      codepoint_offset += pixels_lo_hi[i] << shift_values[i];
+    }
+
+    if (codepoint_offset === 0) {
+      codepoint_offset = 4;
+    }
+    return String.fromCharCode(0x2800 + codepoint_offset);
+  };
+
+  const canvasToText = (canvas) => {
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+
+    let image_data = new Uint8Array(
+      ctx.getImageData(0, 0, width, height).data.buffer
+    );
+
+    let output = "";
+
+    for (let imgy = 0; imgy < height; imgy += 4) {
+      for (let imgx = 0; imgx < width; imgx += 2) {
+        const braille_info = [];
+        let idx = 0;
+        for (let pos = 0; pos < 8; pos++) {
+          const index =
+            (imgx + parseInt(pos / 4) + width * (imgy + (pos % 4))) * 4;
+          const pixel_data = image_data.slice(index, index + 4);
+          if (pixel_data[3] >= 128) {
+            const grey =
+              0.22 * pixel_data[0] +
+              0.72 * pixel_data[1] +
+              0.06 * pixel_data[2];
+
+            if (grey <= 128) braille_info[idx] = 1;
+          }
+          idx++;
+        }
+        output += pixelsToCharacter(braille_info);
+      }
+      output += "\n";
+    }
+    return output;
+  };
 
   const insertContent = (file) => {
     const reader = new FileReader();
