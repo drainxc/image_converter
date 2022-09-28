@@ -141,10 +141,15 @@ const MainPage = () => {
     if (before) {
       loadNewImage(before);
     }
-    setScale({
-      width: editorRef.current.offsetWidth + n * 15,
-      height: editorRef.current.offsetHeight + n * 10,
-    });
+    if (!editorRef.current.offsetWidth)
+      setScale({
+        width: editorRef.current.offsetWidth + n * 15,
+        height: editorRef.current.offsetHeight + n * 10,
+      });
+  };
+
+  const reversal = () => {
+    editorRef.current.style.transform = "scale(-1,1)";
   };
 
   return (
@@ -162,23 +167,22 @@ const MainPage = () => {
         <TypeSelect name="흑백" onChange={(e) => typeChange(e)}>
           <option value="blackAndWhite">흑백</option>
           <option value="colorReversal">색상반전</option>
-          {/* <option value="reversal">반전</option> */}
           <option value="blur">가우시안 블러</option>
           <option value="vintage">빈티지 필터</option>
           <option value="rainbow">레인보우 필터</option>
           <option value="dotart">도트 아트</option>
         </TypeSelect>
-        {/* <Btn>저장</Btn> */}
+        <Btn onClick={() => reversal}>반전</Btn>
         <Btn>삭제</Btn>
         <WidthInput>
           <span>
             Scale : <span>{settings.width}</span>
           </span>
           <PlusMinus>
-            <span onClick={() => setWidth(+1)}>
+            <span onMouseDown={() => setWidth(+1)}>
               <a>+</a>
             </span>
-            <span onClick={() => setWidth(-1)}>
+            <span onMouseDown={() => setWidth(-1)}>
               <a>-</a>
             </span>
           </PlusMinus>
@@ -194,7 +198,7 @@ const MainPage = () => {
               ? "/vintage-texture.jpg"
               : settings.type === "rainbow"
               ? "rainbow-texture.jpg"
-              : ""
+              : " "
           }
           alt=""
           width={scale.width}
@@ -222,6 +226,7 @@ const MainDiv = styled.div`
 const ContentEdit = styled.div`
   width: ${(props) => `${props.width * 15}` + "px"};
   color: white;
+
   img {
     width: 100%;
     height: auto;
@@ -234,7 +239,6 @@ const ContentEdit = styled.div`
         : props.blur
         ? "blur(5px)"
         : "none"};
-    transform: ${(props) => (props.reversal ? "scale(-1,1)" : "scale(1,1)")};
   }
 `;
 
