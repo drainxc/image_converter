@@ -174,6 +174,7 @@ const ContentEdit = styled.div`
     filter: ${(props) =>
       props.blackAndWhite ? "grayscale(1)" : "grayscale(0)"};
     filter: ${(props) => (props.colorReversal ? "invert(1)" : "invert(0)")};
+    transform: ${(props) => (props.reversal ? "scale(-1,1)" : "scale(1,1)")};
   }
 `;
 
