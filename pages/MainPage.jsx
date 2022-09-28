@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
-import Image from "next/image";
 
 const MainPage = () => {
   const [settings, setSettings] = useState({
-    width: 89,
-    type: "blackAndWhite",
+    width: 90,
+    type: "original",
   });
   const editorRef = useRef(null);
   const [edit, setEdit] = useState(false);
@@ -20,7 +19,6 @@ const MainPage = () => {
       width: editorRef.current.offsetWidth,
       height: editorRef.current.offsetHeight,
     });
-    console.log(editorRef.current.offsetHeight);
   }, [edit]);
 
   const SelectFile = (e) => {
@@ -134,6 +132,10 @@ const MainPage = () => {
 
   const typeChange = (e) => {
     setSettings({ ...settings, type: e.target.value });
+    if (editorRef.current.children[0] && e.target.value === "dotart") {
+      editorRef.current.children[editorRef.current.children.length - 1].src =
+        "";
+    }
   };
 
   const setWidth = (n) => {
@@ -141,15 +143,19 @@ const MainPage = () => {
     if (before) {
       loadNewImage(before);
     }
-    if (!editorRef.current.offsetWidth)
-      setScale({
-        width: editorRef.current.offsetWidth + n * 15,
-        height: editorRef.current.offsetHeight + n * 10,
-      });
+
+    setScale({
+      width: editorRef.current.offsetWidth + n * 15,
+      height:
+        editorRef.current.offsetHeight +
+        n * ((scale.height / scale.width) * 15),
+    });
   };
 
   const reversal = () => {
-    editorRef.current.style.transform = "scale(-1,1)";
+    if (editorRef.current.style.transform === "scale(-1, 1)")
+      editorRef.current.style.transform = "scale(1, 1)";
+    else editorRef.current.style.transform = "scale(-1, 1)";
   };
 
   return (
@@ -164,7 +170,8 @@ const MainPage = () => {
           accept="image/*"
           onChange={(e) => SelectFile(e)}
         />
-        <TypeSelect name="흑백" onChange={(e) => typeChange(e)}>
+        <TypeSelect onChange={(e) => typeChange(e)}>
+          <option value="original">원본</option>
           <option value="blackAndWhite">흑백</option>
           <option value="colorReversal">색상반전</option>
           <option value="blur">가우시안 블러</option>
@@ -172,7 +179,7 @@ const MainPage = () => {
           <option value="rainbow">레인보우 필터</option>
           <option value="dotart">도트 아트</option>
         </TypeSelect>
-        <Btn onClick={() => reversal}>반전</Btn>
+        <Btn onClick={() => reversal()}>반전</Btn>
         <Btn>삭제</Btn>
         <WidthInput>
           <span>
@@ -251,7 +258,6 @@ const FilterImage = styled.img`
   top: 0;
   opacity: 0.4;
   z-index: 2;
-  /* background-image: url("/vintage-texture.jpg"); */
   background-blend-mode: overlay;
   background-size: cover;
 `;
