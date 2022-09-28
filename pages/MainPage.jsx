@@ -2,6 +2,38 @@ import { useRef, useState } from "react";
 import styled from "styled-components";
 
 const MainPage = () => {
+  const [settings, setSettings] = useState({
+    width: 89,
+    type: "dotart",
+  });
+  const editorRef = useRef(null);
+  const [edit, setEdit] = useState(false);
+
+  const SelectFile = (e) => {
+    console.log(settings.type);
+    const files = e.target.files[0];
+    if (settings.type === "dotart") {
+    } else if (settings.type == "blackAndWhite") {
+      setEdit(true);
+      insertContent(files);
+    }
+  };
+
+
+  const insertContent = (file) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", function (e) {
+      editorRef.current.focus();
+      document.execCommand("insertImage", false, `${reader.result}`);
+      setEdit(false);
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const typeChange = (e) => {
+    setSettings({ ...settings, type: e.target.value });
+  };
+
   return (
     <MainDiv>
       <SideBar>
