@@ -165,6 +165,7 @@ const MainPage = () => {
           {/* <option value="reversal">반전</option> */}
           <option value="blur">가우시안 블러</option>
           <option value="vintage">빈티지 필터</option>
+          <option value="rainbow">레인보우 필터</option>
           <option value="dotart">도트 아트</option>
         </TypeSelect>
         {/* <Btn>저장</Btn> */}
@@ -187,16 +188,18 @@ const MainPage = () => {
         </Original>
       </SideBar>
       <Content>
-        {settings.type === "vintage" ? (
-          <FilterImage
-            src="/vintage-texture.jpg"
-            alt=""
-            width={scale.width}
-            height={scale.height}
-          />
-        ) : (
-          <>sdsadsa</>
-        )}
+        <FilterImage
+          src={
+            settings.type === "vintage"
+              ? "/vintage-texture.jpg"
+              : settings.type === "rainbow"
+              ? "rainbow-texture.jpg"
+              : ""
+          }
+          alt=""
+          width={scale.width}
+          height={scale.height}
+        />
         <ContentEdit
           contentEditable={edit}
           ref={editorRef}
