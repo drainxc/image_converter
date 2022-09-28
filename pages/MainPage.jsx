@@ -1,14 +1,27 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import Image from "next/image";
 
 const MainPage = () => {
   const [settings, setSettings] = useState({
-    width: 100,
+    width: 89,
     type: "blackAndWhite",
   });
   const editorRef = useRef(null);
   const [edit, setEdit] = useState(false);
   const [before, setBefore] = useState("");
+  const [scale, setScale] = useState({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    setScale({
+      width: editorRef.current.offsetWidth,
+      height: editorRef.current.offsetHeight,
+    });
+    console.log(editorRef.current.offsetHeight);
+  }, [edit]);
 
   const SelectFile = (e) => {
     const files = e.target.files[0];
@@ -23,10 +36,9 @@ const MainPage = () => {
       setBefore(URL.createObjectURL(files));
       loadNewImage(URL.createObjectURL(files));
       setEdit(false);
-    } else if (settings.type == "blackAndWhite") insertContent(files);
-    else if (settings.type == "colorReversal") insertContent(files);
-    else if (settings.type == "reversal") insertContent(files);
-    else if (settings.type == "blur") insertContent(files);
+    } else {
+      insertContent(files);
+    }
   };
 
   async function loadNewImage(src) {
@@ -120,11 +132,19 @@ const MainPage = () => {
     reader.readAsDataURL(file);
   };
 
-  const typeChange = (e) => setSettings({ ...settings, type: e.target.value });
+  const typeChange = (e) => {
+    setSettings({ ...settings, type: e.target.value });
+  };
 
-  const setWidth = (e) => {
-    setSettings({ ...settings, width: e.target.value });
-    loadNewImage(before);
+  const setWidth = (n) => {
+    setSettings({ ...settings, width: settings.width + n });
+    if (before) {
+      loadNewImage(before);
+    }
+    setScale({
+      width: editorRef.current.offsetWidth + n * 15,
+      height: editorRef.current.offsetHeight + n * 10,
+    });
   };
 
   return (
@@ -141,27 +161,42 @@ const MainPage = () => {
         />
         <TypeSelect name="흑백" onChange={(e) => typeChange(e)}>
           <option value="blackAndWhite">흑백</option>
-          <option value="dotart">도트 아트</option>
           <option value="colorReversal">색상반전</option>
-          <option value="reversal">반전</option>
+          {/* <option value="reversal">반전</option> */}
           <option value="blur">가우시안 블러</option>
+          <option value="vintage">빈티지 필터</option>
+          <option value="dotart">도트 아트</option>
         </TypeSelect>
-        <Btn>저장</Btn>
+        {/* <Btn>저장</Btn> */}
         <Btn>삭제</Btn>
-        <WidthInpurt>
-          <span>Width : </span>
-          <input
-            type={"number"}
-            value={settings.width}
-            onChange={(e) => setWidth(e)}
-            step="1"
-          />
-        </WidthInpurt>
+        <WidthInput>
+          <span>
+            Scale : <span>{settings.width}</span>
+          </span>
+          <PlusMinus>
+            <span onClick={() => setWidth(+1)}>
+              <a>+</a>
+            </span>
+            <span onClick={() => setWidth(-1)}>
+              <a>-</a>
+            </span>
+          </PlusMinus>
+        </WidthInput>
         <Original>
           <img src="" alt="" />
         </Original>
       </SideBar>
       <Content>
+        {settings.type === "vintage" ? (
+          <FilterImage
+            src="/vintage-texture.jpg"
+            alt=""
+            width={scale.width}
+            height={scale.height}
+          />
+        ) : (
+          <>sdsadsa</>
+        )}
         <ContentEdit
           contentEditable={edit}
           ref={editorRef}
@@ -183,7 +218,6 @@ const MainDiv = styled.div`
 
 const ContentEdit = styled.div`
   width: ${(props) => `${props.width * 15}` + "px"};
-  height: 100%;
   color: white;
   img {
     width: 100%;
@@ -195,10 +229,24 @@ const ContentEdit = styled.div`
         : props.colorReversal
         ? "invert(1)"
         : props.blur
-        ? "blur(13px)"
+        ? "blur(5px)"
         : "none"};
     transform: ${(props) => (props.reversal ? "scale(-1,1)" : "scale(1,1)")};
   }
+`;
+
+const FilterImage = styled.img`
+  margin-top: 30px;
+  width: ${(props) => `${props.width}` + "px"};
+  height: ${(props) => `${props.height}` + "px"};
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  opacity: 0.4;
+  z-index: 2;
+  /* background-image: url("/vintage-texture.jpg"); */
+  background-blend-mode: overlay;
+  background-size: cover;
 `;
 
 const Content = styled.p`
@@ -207,6 +255,7 @@ const Content = styled.p`
   width: 78vw;
   height: 100vh;
   padding: 30px;
+  position: relative;
 
   &::-webkit-scrollbar {
     background-color: var(--sub-color);
@@ -319,10 +368,13 @@ const Btn = styled.div`
   justify-content: center;
 `;
 
-const WidthInpurt = styled.div`
+const WidthInput = styled.div`
   margin-top: 15px;
   color: var(--sub-color);
   font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+
   input {
     width: 73px;
     height: 40px;
@@ -332,5 +384,28 @@ const WidthInpurt = styled.div`
     border: none;
     outline: none;
     padding-left: 10px;
+  }
+`;
+
+const PlusMinus = styled.div`
+  margin-left: 10px;
+  text-align: center;
+  font-size: 25px;
+  display: flex;
+  flex-direction: column;
+
+  span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 24px;
+    margin: 5px 0;
+    background-color: var(--box-color);
+    a {
+      margin-left: 1px;
+      margin-bottom: 4px;
+    }
   }
 `;
