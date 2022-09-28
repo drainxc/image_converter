@@ -173,6 +173,7 @@ const ContentEdit = styled.div`
     object-fit: cover;
     filter: ${(props) =>
       props.blackAndWhite ? "grayscale(1)" : "grayscale(0)"};
+    filter: ${(props) => (props.colorReversal ? "invert(1)" : "invert(0)")};
   }
 `;
 
