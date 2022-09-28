@@ -23,6 +23,9 @@ const MainPage = () => {
     } else if (settings.type == "reversal") {
       setEdit(true);
       insertContent(files);
+    } else if (settings.type == "blur") {
+      setEdit(true);
+      insertContent(files);
     }
   };
 
@@ -155,6 +158,7 @@ const MainPage = () => {
           blackAndWhite={settings.type === "blackAndWhite"}
           colorReversal={settings.type === "colorReversal"}
           reversal={settings.type === "reversal"}
+          blur={settings.type === "blur"}
         ></ContentEdit>
       </Content>
     </MainDiv>
@@ -167,13 +171,21 @@ const MainDiv = styled.div`
 `;
 
 const ContentEdit = styled.div`
+  width: 100%;
+  height: 100%;
+  color: white;
   img {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: cover;
     filter: ${(props) =>
-      props.blackAndWhite ? "grayscale(1)" : "grayscale(0)"};
-    filter: ${(props) => (props.colorReversal ? "invert(1)" : "invert(0)")};
+      props.blackAndWhite
+        ? "grayscale(1)"
+        : props.colorReversal
+        ? "invert(1)"
+        : props.blur
+        ? "blur(13px)"
+        : "blur(0px)"};
     transform: ${(props) => (props.reversal ? "scale(-1,1)" : "scale(1,1)")};
   }
 `;
@@ -185,11 +197,6 @@ const Content = styled.p`
   width: 78vw;
   height: 100vh;
   padding: 30px;
-  div {
-    width: 100%;
-    height: 100%;
-    color: white;
-  }
 `;
 
 const SideBar = styled.div`
