@@ -4,7 +4,7 @@ import styled from "styled-components";
 const MainPage = () => {
   const [settings, setSettings] = useState({
     width: 89,
-    type: "dotart",
+    type: "blackAndWhite",
   });
   const editorRef = useRef(null);
   const [edit, setEdit] = useState(false);
@@ -15,6 +15,12 @@ const MainPage = () => {
     if (settings.type === "dotart") {
       loadNewImage(URL.createObjectURL(files));
     } else if (settings.type == "blackAndWhite") {
+      setEdit(true);
+      insertContent(files);
+    } else if (settings.type == "colorReversal") {
+      setEdit(true);
+      insertContent(files);
+    } else if (settings.type == "reversal") {
       setEdit(true);
       insertContent(files);
     }
@@ -127,9 +133,9 @@ const MainPage = () => {
           accept="image/*"
           onChange={(e) => SelectFile(e)}
         />
-        <TypeSelect name="도트 아트" onChange={(e) => typeChange(e)}>
-          <option value="dotart">도트 아트</option>
+        <TypeSelect name="흑백" onChange={(e) => typeChange(e)}>
           <option value="blackAndWhite">흑백</option>
+          <option value="dotart">도트 아트</option>
           <option value="colorReversal">색상반전</option>
           <option value="reversal">반전</option>
           <option value="clmtrackr">clmtrackr</option>
@@ -143,7 +149,13 @@ const MainPage = () => {
         </Original>
       </SideBar>
       <Content>
-        <ContentEdit contentEditable={edit} ref={editorRef}></ContentEdit>
+        <ContentEdit
+          contentEditable={edit}
+          ref={editorRef}
+          blackAndWhite={settings.type === "blackAndWhite"}
+          colorReversal={settings.type === "colorReversal"}
+          reversal={settings.type === "reversal"}
+        ></ContentEdit>
       </Content>
     </MainDiv>
   );
@@ -159,6 +171,8 @@ const ContentEdit = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: ${(props) =>
+      props.blackAndWhite ? "grayscale(1)" : "grayscale(0)"};
   }
 `;
 
