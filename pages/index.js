@@ -1,14 +1,14 @@
 import Head from "next/head";
-import Image from "next/image";
+// import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 // import MainPage from "./MainPage";
 const MainPage = dynamic(() => import("./MainPage"), {
   ssr: false,
 });
 export default function Home() {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <div className={styles.container}>

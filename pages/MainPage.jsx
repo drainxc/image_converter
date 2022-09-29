@@ -13,6 +13,7 @@ const MainPage = () => {
     width: 0,
     height: 0,
   });
+  const [files, setFiles] = useState("");
 
   useEffect(() => {
     setScale({
@@ -22,7 +23,7 @@ const MainPage = () => {
   }, [edit]);
 
   const SelectFile = (e) => {
-    const files = e.target.files[0];
+    setFiles(e.target.files[0]);
     editorRef.current.value = "";
     if (editorRef.current.children[0]) {
       editorRef.current.children[editorRef.current.children.length - 1].src =
@@ -31,11 +32,11 @@ const MainPage = () => {
 
     setEdit(true);
     if (settings.type === "dotart") {
-      setBefore(URL.createObjectURL(files));
-      loadNewImage(URL.createObjectURL(files));
+      setBefore(URL.createObjectURL(e.target.files[0]));
+      loadNewImage(URL.createObjectURL(e.target.files[0]));
       setEdit(false);
     } else {
-      insertContent(files);
+      insertContent(e.target.files[0]);
     }
   };
 
@@ -135,6 +136,18 @@ const MainPage = () => {
     if (editorRef.current.children[0] && e.target.value === "dotart") {
       editorRef.current.children[editorRef.current.children.length - 1].src =
         "";
+    }
+    editorRef.current.innerHTML = "";
+
+    setEdit(true);
+    if (files) {
+      if (e.target.value === "dotart") {
+        setBefore(URL.createObjectURL(files));
+        loadNewImage(URL.createObjectURL(files));
+        setEdit(false);
+      } else {
+        insertContent(files);
+      }
     }
   };
 
